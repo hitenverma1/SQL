@@ -105,11 +105,21 @@ and dma.Manufacturer_Name not in (select distinct(dma.Manufacturer_Name)
 
 
 --10. Find top 100 customers and their average spend, average quantity by each year. Also find the percentage of change in their spend. 
-select top 100 dmc.Customer_Name, AVG(f.TotalPrice), year(f.date) as avg_price
+SELECT dmc.Customer_name,
+       YEAR(f.date) AS year,
+       AVG(f.TotalPrice) AS avg_spend,
+       AVG(f.Quantity) AS avg_quantity,
+       100 * (AVG(f.TotalPrice) - LAG(AVG(f.TotalPrice)) OVER (PARTITION BY dmc.Customer_name ORDER BY YEAR(f.date))) / 
+	   LAG(AVG(f.TotalPrice)) OVER (PARTITION BY dmc.Customer_name ORDER BY YEAR(f.date)) AS spend_percent_change
 from FACT_TRANSACTIONS f
 join DIM_CUSTOMER dmc
 on f.IDCustomer = dmc.IDCustomer
-group by dmc.Customer_Name, year(f.date)
+GROUP BY dmc.Customer_name, YEAR(f.date)
+ORDER BY avg_spend DESC
+OFFSET 0 ROWS FETCH NEXT 100 ROWS ONLY;
+
+
+
 
 
 
