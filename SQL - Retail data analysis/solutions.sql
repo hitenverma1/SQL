@@ -121,12 +121,30 @@ and tran_date between DATEADD(day, -30, (select max(tran_date) from transactions
 
 
 --12.Which product category has seen the max value of returns in the last 3 months of transactions?
+select p.prod_cat, t.tran_date from Transactions t
+inner join prod_cat_info p
+on t.prod_cat_code = p.prod_cat_code and t.prod_subcat_code = p.prod_sub_cat_code
+where tran_date >= DATEADD(month, -3, (select max(tran_date) from transactions))
+group by p.prod_cat
 
+select * from Customer
 
+select * from prod_cat_info
+
+select * from Transactions
 
 --13.Which store-type sells the maximum products; by value of sales amount and by quantity sold?
+SELECT TOP 1 Store_type 
+FROM (
+    SELECT t.Store_type, MAX(t.total_amt) AS max_total_amt, MAX(t.Qty) AS max_qty, COUNT(t.Qty) AS qty_sold 
+    FROM Transactions t
+    INNER JOIN prod_cat_info p ON t.prod_cat_code = p.prod_cat_code AND t.prod_subcat_code = p.prod_sub_cat_code
+    WHERE t.Qty > 0
+    GROUP BY t.Store_type
+) AS q
+ORDER BY q.qty_sold;
+
 
 --14.What are the categories for which average revenue is above the overall average.
-
 
 --15. Find the average and total revenue by each subcategory for the categories which are among top 5 categories in terms of quantity sold. 
